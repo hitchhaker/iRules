@@ -1,0 +1,28 @@
+when HTTP_REQUEST {
+    set reqBlock 0
+    if {[HTTP::uri] contains "/dvwa/vulnerabilities/upload/"} {
+        HTTP::collect 1000
+    }
+    
+}
+
+when HTTP_REQUEST_DATA {
+    log local0. "HTTP payload: [HTTP::payload]"
+    if {[string tolower [HTTP::payload]] contains "filename=*.zip"} {
+        log local0. "Illegal zip file upload attempt"
+        set reqBlock 1
+    } elseif {[string tolower [HTTP::header value "Content-Type"]] contains "zip"} {
+        log local0. "Illegal zip file upload attempt detected in HTTP header"
+        set reqBlock 1
+    } elseif {[string tolower [HTTP::header value "Content-Disposition"]] contains ".zip"} {
+        log local0. "Illegal zip file upload attempt detected in HTTP header"
+        set reqBlock 1
+    }
+    HTTP::release
+}
+
+when ASM_REQUEST_DONE {
+    if {$reqBlock == 1} {
+        ASM::raise ZIP_ARCHIVE_UPLOAD
+    }
+}
