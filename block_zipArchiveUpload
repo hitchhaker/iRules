@@ -1,3 +1,9 @@
+/*
+iRule blocks zip archives from upload on DVWA page specified with URL: /dvwa/vulnerabilities/upload/
+To make it perform file upload checks previously set the "Trigger ASM iRule Events Mode" to "Normal" on F5 in the appropriate ASM policy
+Go to Security> Options> Application Security> Advance Configuration> Violations List> User-Defined Violations and create a Violation with the name ZIP_ARCHIVE_UPLOAD (the main thing is the name should match the Violation what is triggered in the script)
+*/
+
 when HTTP_REQUEST {
     set reqBlock 0
     if {[HTTP::uri] contains "/dvwa/vulnerabilities/upload/"} {
